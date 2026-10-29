@@ -1,0 +1,29 @@
+{
+    "project": "Car Price Prediction",
+    "model": "RandomForestRegressor",
+    "best_parameters": {
+        "model__max_depth": null,
+        "model__min_samples_leaf": 1,
+        "model__min_samples_split": 5,
+        "model__n_estimators": 200
+    },
+    "best_5_fold_cv_rmse": 176971.49617789293,
+    "numeric_features": [
+        "car_age",
+        "km_driven",
+        "mileage_numeric",
+        "engine_cc",
+        "max_power_bhp",
+        "seats"
+    ],
+    "categorical_features": [
+        "brand",
+        "fuel",
+        "seller_type",
+        "transmission",
+        "owner",
+        "mileage_unit"
+    ],
+    "target": "selling_price",
+    "random_state": 42
+}

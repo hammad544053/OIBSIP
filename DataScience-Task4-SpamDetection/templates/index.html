@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Spam Shield NLP | Oasis Infobyte</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <header class="navbar">
+        <div class="brand-box">
+            <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Oasis Infobyte Logo" class="brand-logo" onerror="this.style.display='none'">
+            <div class="brand-text">
+                <h1>Oasis Infobyte Internship Project</h1>
+                <p>Data Science Task 4 — Email Spam Detection with Machine Learning</p>
+            </div>
+        </div>
+        <button class="btn-nav" onclick="toggleModal(true)">NLP Architecture</button>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="wrapper">
+        <div class="main-card">
+            <div class="card-header">
+                <h2>Email & SMS Spam Shield</h2>
+                <p>Paste message text below to execute real-time TF-IDF vectorization and classification.</p>
+            </div>
+
+            <form action="/" method="POST" id="spamForm">
+                <div class="form-group">
+                    <label for="message_text">Message Content</label>
+                    <textarea name="message_text" id="message_text" placeholder="Paste email content here (e.g., 'Congratulations! You have won $200,000 from an unknown source...')" required>{{ user_text }}</textarea>
+                </div>
+
+                <button type="submit" class="btn-predict" id="analyzeBtn">
+                    <span id="btnText">Scan & Classify Message</span>
+                </button>
+            </form>
+
+            <!-- Error Banner -->
+            {% if error_msg %}
+            <div class="error-banner">
+                <strong>Notification:</strong> {{ error_msg }}
+            </div>
+            {% endif %}
+
+            <!-- Prediction Results -->
+            {% if prediction_label %}
+            <div class="results-card" style="text-align: center;">
+                <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px;">CLASSIFICATION OUTCOME</p>
+
+                {% if prediction_code == 1 %}
+                <div class="status-badge-spam">⚠️ SPAM DETECTED</div>
+                {% else %}
+                <div class="status-badge-ham">✅ NOT SPAM</div>
+                {% endif %}
+
+                {% if confidence_score %}
+                <p style="font-size: 0.95rem; color: #cbd5e1; margin-top: 12px;">
+                    Model Confidence: <strong>{{ confidence_score }}%</strong>
+                </p>
+                {% endif %}
+
+                {% if detected_triggers %}
+                <div class="trigger-box">
+                    {% for trigger in detected_triggers %}
+                    <span class="trigger-tag">Detected Trigger: "{{ trigger }}"</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if chart_url %}
+                <div class="chart-box">
+                    <img src="data:image/png;base64,{{ chart_url }}" alt="Probability Distribution Chart">
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+        </div>
+    </main>
+
+    <!-- Model Intelligence Modal -->
+    <div class="modal" id="overviewModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="toggleModal(false)">&times;</span>
+            <h3 style="margin-bottom: 12px; color: var(--primary-cyan);">NLP Model Architecture</h3>
+            <p style="font-size: 0.88rem; color: #94a3b8; margin-bottom: 16px;">
+                TF-IDF Vectorizer + Logistic Regression pipeline trained on SMS/Email corpus.
+            </p>
+
+            <ul style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.8; padding-left: 20px;">
+                <li><strong>Vectorizer:</strong> TF-IDF (ngrams 1-2, sublinear scaling)</li>
+                <li><strong>Classifier:</strong> Logistic Regression (max_iter=1000)</li>
+                <li><strong>Test Accuracy:</strong> 96.51%</li>
+                <li><strong>Test Precision:</strong> 100% (Zero False Positives)</li>
+                <li><strong>Labels:</strong> SPAM vs. NOT SPAM</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer class="footer">
+        OIBSIP Data Science Internship Submission | Task 4
+    </footer>
+
+    <script>
+        function toggleModal(show) {
+            document.getElementById('overviewModal').style.display = show ? 'flex' : 'none';
+        }
+
+        document.getElementById('spamForm').addEventListener('submit', function() {
+            const btn = document.getElementById('analyzeBtn');
+            const btnText = document.getElementById('btnText');
+            btnText.innerText = 'Analyzing Text Features...';
+            btn.style.opacity = '0.85';
+        });
+    </script>
+</body>
+</html>

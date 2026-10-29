@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Price Valuation Engine | Oasis Infobyte</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <header class="navbar">
+        <div class="brand-box">
+            <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Oasis Infobyte Logo" class="brand-logo" onerror="this.style.display='none'">
+            <div class="brand-text">
+                <h1>Oasis Infobyte Internship Project</h1>
+                <p>Data Science Task 3 — Car Price Prediction with Machine Learning</p>
+            </div>
+        </div>
+        <button class="btn-nav" onclick="toggleModal(true)">Model Intelligence</button>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="wrapper">
+        <div class="main-card">
+            <div class="card-header">
+                <h2>Used Car Price Evaluator</h2>
+                <p>Enter vehicle metrics to calculate real-time estimated resale valuation.</p>
+            </div>
+
+            <form action="/" method="POST" id="predictionForm">
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="brand">Brand / Make</label>
+                        <select name="brand" id="brand" required>
+                            <option value="Maruti">Maruti</option>
+                            <option value="Hyundai">Hyundai</option>
+                            <option value="Mahindra">Mahindra</option>
+                            <option value="Tata">Tata</option>
+                            <option value="Honda">Honda</option>
+                            <option value="Toyota">Toyota</option>
+                            <option value="Ford">Ford</option>
+                            <option value="Volkswagen">Volkswagen</option>
+                            <option value="BMW">BMW</option>
+                            <option value="Mercedes-Benz">Mercedes-Benz</option>
+                            <option value="Audi">Audi</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="model_name">Model Series</label>
+                        <input type="text" name="model_name" id="model_name" placeholder="e.g. Swift" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="year">Year</label>
+                        <input type="number" name="year" id="year" min="1983" max="2020" value="2017" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="km_driven">KM Driven</label>
+                        <input type="number" name="km_driven" id="km_driven" placeholder="e.g. 45000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fuel">Fuel Type</label>
+                        <select name="fuel" id="fuel" required>
+                            <option value="Diesel">Diesel</option>
+                            <option value="Petrol">Petrol</option>
+                            <option value="CNG">CNG</option>
+                            <option value="LPG">LPG</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="transmission">Transmission</label>
+                        <select name="transmission" id="transmission" required>
+                            <option value="Manual">Manual</option>
+                            <option value="Automatic">Automatic</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="seller_type">Seller Type</label>
+                        <select name="seller_type" id="seller_type" required>
+                            <option value="Individual">Individual</option>
+                            <option value="Dealer">Dealer</option>
+                            <option value="Trustmark Dealer">Trustmark Dealer</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="owner">Ownership</label>
+                        <select name="owner" id="owner" required>
+                            <option value="First Owner">First Owner</option>
+                            <option value="Second Owner">Second Owner</option>
+                            <option value="Third Owner">Third Owner</option>
+                            <option value="Fourth & Above Owner">Fourth & Above Owner</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mileage">Mileage</label>
+                        <input type="number" step="0.1" name="mileage" id="mileage" placeholder="e.g. 21.4" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mileage_unit">Unit</label>
+                        <select name="mileage_unit" id="mileage_unit" required>
+                            <option value="kmpl">kmpl</option>
+                            <option value="km/kg">km/kg</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="engine">Engine (CC)</label>
+                        <input type="number" name="engine" id="engine" placeholder="e.g. 1248" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="max_power">Power (BHP)</label>
+                        <input type="number" step="0.1" name="max_power" id="max_power" placeholder="e.g. 88.5" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <button type="submit" class="btn-predict" id="predictBtn">
+                            <span id="btnText">Calculate Valuation</span>
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+
+            <!-- Error Banner -->
+            {% if error_msg %}
+            <div class="error-banner">
+                <strong>Pipeline Notification:</strong> {{ error_msg }}
+            </div>
+            {% endif %}
+
+            <!-- Prediction Outcome & Dynamic Visuals -->
+            {% if formatted_price %}
+            <div class="results-card" id="resultsSection">
+                <h3 style="color: #334155; font-size: 1rem;">Estimated Market Selling Price</h3>
+                <div class="prediction-value">{{ formatted_price }}</div>
+
+                {% if submitted_inputs %}
+                <div class="inputs-summary">
+                    {% for key, value in submitted_inputs.items() %}
+                    <span class="summary-badge"><strong>{{ key }}:</strong> {{ value }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if chart_url %}
+                <div class="chart-box">
+                    <img src="data:image/png;base64,{{ chart_url }}" alt="Valuation Comparison Chart">
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+        </div>
+    </main>
+
+    <!-- Model Overview Modal -->
+    <div class="modal" id="overviewModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="toggleModal(false)">&times;</span>
+            <h3 style="margin-bottom: 12px; color: #0f172a;">Model Intelligence Overview</h3>
+            <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 14px;">
+                Evaluates vehicle metrics using a Random Forest Regressor pipeline trained on 6,926 deduplicated listings.
+            </p>
+
+            <ul style="font-size: 0.85rem; color: #334155; line-height: 1.8; padding-left: 20px;">
+                <li><strong>Model Architecture:</strong> Random Forest Regressor Pipeline</li>
+                <li><strong>Baseline Test R²:</strong> 0.932</li>
+                <li><strong>Test Mean Absolute Error (MAE):</strong> ₹71,620.89</li>
+                <li><strong>Primary Predictor:</strong> Max Power BHP (~60.5% Importance)</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer class="footer">
+        OIBSIP Data Science Internship Submission | Task 3
+    </footer>
+
+    <script>
+        function toggleModal(show) {
+            document.getElementById('overviewModal').style.display = show ? 'flex' : 'none';
+        }
+
+        // Add loading state animation on submit button
+        document.getElementById('predictionForm').addEventListener('submit', function() {
+            const btn = document.getElementById('predictBtn');
+            const btnText = document.getElementById('btnText');
+            btnText.innerText = 'Evaluating Pipeline...';
+            btn.style.opacity = '0.8';
+        });
+    </script>
+</body>
+</html>
