@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unemployment Forecasting Dashboard | Oasis Infobyte</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+        <div class="brand-box">
+            <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Oasis Infobyte Logo" class="brand-logo" onerror="this.style.display='none'">
+            <div class="brand-text">
+                <h1>Oasis Infobyte Internship Project</h1>
+                <p>Data Science Task 2 — Unemployment Analysis in India</p>
+            </div>
+        </div>
+        <button class="btn-nav" onclick="toggleModal(true)">Model Overview</button>
+    </header>
+
+    <!-- Centered Form Container -->
+    <main class="wrapper">
+        <div class="main-card">
+            <div class="card-header">
+                <h2>Forecast Predictor</h2>
+                <p>Enter economic indicators below to compute real-time unemployment predictions.</p>
+            </div>
+
+            <form action="/" method="POST">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="labor_rate">Labour Participation Rate (%)</label>
+                        <input type="number" step="0.01" name="labor_rate" id="labor_rate" placeholder="e.g. 42.5" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="employed">Estimated Employed Count</label>
+                        <input type="number" step="1" name="employed" id="employed" placeholder="e.g. 10500000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="region">Region / State</label>
+                        <input type="text" name="region" id="region" placeholder="e.g. Uttar Pradesh" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="area">Area Classification</label>
+                        <select name="area" id="area" required>
+                            <option value="Rural">Rural</option>
+                            <option value="Urban">Urban</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <button type="submit" class="btn-predict">Run Prediction</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Error Notification Banner -->
+            {% if error_msg %}
+            <div class="error-banner">
+                <strong>Notification:</strong> {{ error_msg }}
+            </div>
+            {% endif %}
+
+            <!-- Prediction Result & Visuals -->
+            {% if prediction is not none %}
+            <div class="results-card">
+                <h3>Predicted Unemployment Rate</h3>
+                <div class="prediction-value">{{ prediction }}%</div>
+
+                {% if chart_url %}
+                <div class="chart-box">
+                    <img src="data:image/png;base64,{{ chart_url }}" alt="Unemployment Analysis Chart">
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <!-- Model Overview Modal -->
+    <div class="modal" id="overviewModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="toggleModal(false)">&times;</span>
+            <h3 style="margin-bottom: 12px; color: #0f172a;">Model Overview & Performance</h3>
+            <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 16px;">
+                This application utilizes a trained machine learning pipeline saved directly from EDA and evaluation workflows (`unemployment_forecasting_pipeline.joblib`).
+            </p>
+
+            <ul style="font-size: 0.9rem; color: #334155; line-height: 1.8; padding-left: 20px;">
+                <li><strong>Architecture:</strong> Machine Learning Pipeline Regressor</li>
+                <li><strong>Features Evaluated:</strong> 4 Primary Metrics</li>
+                <li><strong>Data Scope:</strong> Pre & Post COVID-19 Period Analysis</li>
+            </ul>
+
+            <h4 style="margin: 18px 0 8px 0; font-size: 0.95rem;">Project Deliverables Checklist</h4>
+            <ul style="font-size: 0.85rem; color: #475569; padding-left: 20px; line-height: 1.6;">
+                <li>Exploratory Data Analysis (EDA) on Indian Unemployment</li>
+                <li>Time-Series Trend Identification (Pre vs Post COVID-19)</li>
+                <li>Regional & Temporal Unemployment Visualizations</li>
+                <li>Serialized Machine Learning Pipeline Integration</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer class="footer">
+        OIBSIP Data Science Internship Submission | Task 2
+    </footer>
+
+    <script>
+        function toggleModal(show) {
+            document.getElementById('overviewModal').style.display = show ? 'flex' : 'none';
+        }
+    </script>
+</body>
+</html>

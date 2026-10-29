@@ -1,0 +1,42 @@
+{
+    "project": "Unemployment Analysis with Python",
+    "task_type": "Supervised regression / one-step-ahead forecasting experiment",
+    "target": "Estimated Unemployment Rate (%)",
+    "features": [
+        "Year",
+        "Month",
+        "Lag1_Unemployment",
+        "Lag2_Unemployment",
+        "Lag1_Employed",
+        "Lag1_Labour_Participation",
+        "Region",
+        "Area"
+    ],
+    "numeric_features": [
+        "Year",
+        "Month",
+        "Lag1_Unemployment",
+        "Lag2_Unemployment",
+        "Lag1_Employed",
+        "Lag1_Labour_Participation"
+    ],
+    "categorical_features": [
+        "Region",
+        "Area"
+    ],
+    "selected_model": "Ridge",
+    "best_parameters": {
+        "model__alpha": 0.1
+    },
+    "best_cv_mae": 4.8360854457767175,
+    "train_start": "2019-07-31",
+    "train_end": "2020-04-30",
+    "test_start": "2020-05-31",
+    "test_end": "2020-06-30",
+    "test_metrics": {
+        "MAE": 9.847617646395694,
+        "RMSE": 13.183194286812613,
+        "R2": 0.15052464494964557
+    },
+    "limitation": "Short historical dataset; test period covers May-June 2020. Forecasting performance may not generalize to other periods."
+}
