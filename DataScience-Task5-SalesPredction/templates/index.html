@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block crumb %}Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="heading">
+    <div>
+        <label>ADVERTISEMENT & CONVERSION ANALYTICS</label>
+        <h1>Visitor Click <span>Intelligence.</span></h1>
+        <p>Monitor conversion predictions, click probability trends, and visitor engagement signals.</p>
+    </div>
+    <a class="button" href="/predict"><i class="fa-solid fa-plus"></i> New Prediction</a>
+</div>
+
+<!-- KPI Summary Cards -->
+<div class="stats">
+    <div class="card">
+        <div class="card-top">
+            <small>TOTAL ANALYSES</small>
+            <i class="fa-solid fa-layer-group icon-cyan"></i>
+        </div>
+        <strong>{{ total }}</strong>
+        <p>Logged visitor evaluations</p>
+    </div>
+
+    <div class="card">
+        <div class="card-top">
+            <small>LIKELY CLICKS (1)</small>
+            <i class="fa-solid fa-arrow-pointer icon-emerald"></i>
+        </div>
+        <strong class="text-emerald">{{ clicked }}</strong>
+        <p>High-intent ad conversions</p>
+    </div>
+
+    <div class="card">
+        <div class="card-top">
+            <small>NO-CLICKS (0)</small>
+            <i class="fa-solid fa-ban icon-rose"></i>
+        </div>
+        <strong class="text-rose">{{ not_clicked }}</strong>
+        <p>Low conversion probability</p>
+    </div>
+
+    <div class="card">
+        <div class="card-top">
+            <small>AVG CLICK PROBABILITY</small>
+            <i class="fa-solid fa-gauge-high icon-indigo"></i>
+        </div>
+        <strong class="text-cyan">{{ (avg * 100)|round(1) }}%</strong>
+        <p>Model F1: {{ (model_f1 * 100)|round(1) }}%</p>
+    </div>
+</div>
+
+<!-- Dashboard Charts Row -->
+<div class="charts-grid">
+    <section class="panel">
+        <div class="panel-head">
+            <div>
+                <h3>Click Probability Trend (Recent Evaluations)</h3>
+                <p>Estimated ad-click likelihood (%) across latest visitor sessions</p>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-head">
+            <div>
+                <h3>Conversion Split</h3>
+                <p>Predicted Clicks vs. No-Clicks</p>
+            </div>
+        </div>
+        <div class="chart-container doughnut-wrap">
+            <canvas id="splitChart"></canvas>
+        </div>
+    </section>
+</div>
+
+<!-- Recent Prediction Logs Table -->
+<section class="panel" style="margin-top: 20px;">
+    <div class="panel-head">
+        <div>
+            <h3>Recent Prediction Logs</h3>
+            <p>Latest visitor profiles evaluated and stored in <code>prediction_history.csv</code></p>
+        </div>
+        {% if recent %}
+        <form action="/history/clear" method="post" onsubmit="return confirm('Clear all saved prediction logs?')">
+            <button class="button danger" type="submit"><i class="fa-solid fa-trash-can"></i> Clear Logs</button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if recent %}
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>TIMESTAMP</th>
+                    <th>AGE</th>
+                    <th>GENDER</th>
+                    <th>SITE TIME</th>
+                    <th>INTERNET USE</th>
+                    <th>AREA INCOME</th>
+                    <th>CLICK PROB.</th>
+                    <th>OUTCOME</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in recent %}
+                <tr>
+                    <td>{{ r.timestamp }}</td>
+                    <td>{{ r.age|float|int }} yrs</td>
+                    <td>{{ r.gender }}</td>
+                    <td>{{ r.daily_time }} min</td>
+                    <td>{{ r.daily_internet }} min</td>
+                    <td>${{ "{:,.0f}".format(r.area_income|float) }}</td>
+                    <td><strong>{{ (r.click_probability|float * 100)|round(1) }}%</strong></td>
+                    <td>
+                        <span class="pill {{ 'yes' if r.prediction == '1' else 'no' }}">
+                            {{ 'Likely Click' if r.prediction == '1' else 'Unlikely' }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty">
+        <i class="fa-solid fa-chart-simple"></i>
+        <h3>No predictions recorded yet</h3>
+        <p>Run your first visitor evaluation to populate the dashboard charts and table.</p>
+        <a class="button" href="/predict">Make First Prediction</a>
+    </div>
+    {% endif %}
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const labels = {{ chart_labels | tojson }};
+    const probs = {{ chart_probs | tojson }};
+    const clickedCount = {{ clicked }};
+    const notClickedCount = {{ not_clicked }};
+
+    // Fallback demo values if history is empty so charts render cleanly
+    const displayLabels = labels.length ? labels : ["Sample 1", "Sample 2", "Sample 3", "Sample 4"];
+    const displayProbs = probs.length ? probs : [84.2, 22.5, 91.0, 38.4];
+
+    // 1. Line Trend Chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: displayLabels,
+            datasets: [{
+                label: 'Click Probability (%)',
+                data: displayProbs,
+                borderColor: '#38bdf8',
+                backgroundColor: 'rgba(56, 189, 248, 0.15)',
+                borderWidth: 3,
+                pointBackgroundColor: '#818cf8',
+                pointBorderColor: '#ffffff',
+                pointRadius: 5,
+                fill: true,
+                tension: 0.35
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: { color: 'rgba(148, 163, 184, 0.12)' },
+                    ticks: { color: '#94a3b8', callback: v => v + '%' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#94a3b8' }
+                }
+            }
+        }
+    });
+
+    // 2. Doughnut Conversion Chart
+    const splitCtx = document.getElementById('splitChart').getContext('2d');
+    const hasData = (clickedCount + notClickedCount) > 0;
+    new Chart(splitCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Likely Click (1)', 'Unlikely (0)'],
+            datasets: [{
+                data: hasData ? [clickedCount, notClickedCount] : [1, 1],
+                backgroundColor: ['#10b981', '#f43f5e'],
+                borderColor: '#0d1832',
+                borderWidth: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#cbd5e1', padding: 16, font: { size: 12 } }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

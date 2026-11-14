@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>{% block title %}Dashboard{% endblock %} | AdClick & Sales AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <aside class="sidebar" id="sidebar">
+        <a class="brand" href="/">
+            <span class="brand-icon"><i class="fa-solid fa-chart-line"></i></span>
+            <div>
+                <b>AdClick <em>AI</em></b>
+                <small>OIBSIP Task 5</small>
+            </div>
+        </a>
+
+        <small class="nav-label">NAVIGATION</small>
+        <a class="{{ 'active' if active == 'dashboard' }}" href="/">
+            <i class="fa-solid fa-chart-pie"></i> Dashboard & Visuals
+        </a>
+        <a class="{{ 'active' if active == 'predict' }}" href="/predict">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Make a Prediction
+        </a>
+
+        <small class="nav-label">MODEL & INFO</small>
+        <button type="button" class="nav-btn" onclick="toggleModal(true)">
+            <i class="fa-solid fa-microchip"></i> Model Architecture
+        </button>
+
+        <div class="side-bottom">
+            <div class="status-row"><span class="online"></span> <strong>Engine Online</strong></div>
+            <small>{{ model_name }} · F1: {{ (model_f1 * 100)|round(1) }}%</small>
+        </div>
+    </aside>
+
+    <main>
+        <header>
+            <button id="menu" aria-label="Toggle Menu"><i class="fa-solid fa-bars"></i></button>
+            <div class="breadcrumb">
+                <span>Workspace</span>
+                <i class="fa-solid fa-chevron-right"></i>
+                <strong>{% block crumb %}Dashboard{% endblock %}</strong>
+            </div>
+            <div class="header-actions">
+                <span class="badge"><i class="online"></i> {{ model_name|upper }}</span>
+            </div>
+        </header>
+
+        <div class="content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for cat, msg in messages %}
+                    <div class="flash {{ cat }}">
+                        <i class="fa-solid {{ 'fa-circle-check' if cat == 'success' else 'fa-triangle-exclamation' }}"></i>
+                        {{ msg }}
+                    </div>
+                {% endfor %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+
+            <footer>
+                © 2026 AdClick AI · Oasis Infobyte Data Science Internship (Task 5)
+            </footer>
+        </div>
+    </main>
+
+    <!-- Model Details Modal -->
+    <div class="modal" id="modelModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="toggleModal(false)">&times;</button>
+            <div class="modal-header">
+                <span class="pill-tag">BINARY CLASSIFICATION PIPELINE</span>
+                <h3>Model Intelligence & Specifications</h3>
+                <p>Trained on visitor browsing duration, demographics, area income, and visit timestamps.</p>
+            </div>
+
+            <div class="modal-stats">
+                <div class="m-stat">
+                    <small>CLASSIFIER</small>
+                    <strong>{{ model_name }}</strong>
+                </div>
+                <div class="m-stat">
+                    <small>REPORTED F1 SCORE</small>
+                    <strong class="text-cyan">{{ (model_f1 * 100)|round(2) }}%</strong>
+                </div>
+                <div class="m-stat">
+                    <small>SCALER</small>
+                    <strong>StandardScaler</strong>
+                </div>
+            </div>
+
+            <div class="modal-features">
+                <h4>Expected Input Schema ({{ features|length }} Features)</h4>
+                <div class="feature-tags">
+                    {% for f in features %}
+                        <span>{{ loop.index }}. {{ f }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
