@@ -1,219 +1,234 @@
-{% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
-{% block crumb %}Analytics Dashboard{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Science Project — Task 5: Sales Prediction | Oasis Infobyte</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
 
-{% block content %}
-<div class="heading">
-    <div>
-        <label>ADVERTISEMENT & CONVERSION ANALYTICS</label>
-        <h1>Visitor Click <span>Intelligence.</span></h1>
-        <p>Monitor conversion predictions, click probability trends, and visitor engagement signals.</p>
-    </div>
-    <a class="button" href="/predict"><i class="fa-solid fa-plus"></i> New Prediction</a>
-</div>
-
-<!-- KPI Summary Cards -->
-<div class="stats">
-    <div class="card">
-        <div class="card-top">
-            <small>TOTAL ANALYSES</small>
-            <i class="fa-solid fa-layer-group icon-cyan"></i>
-        </div>
-        <strong>{{ total }}</strong>
-        <p>Logged visitor evaluations</p>
-    </div>
-
-    <div class="card">
-        <div class="card-top">
-            <small>LIKELY CLICKS (1)</small>
-            <i class="fa-solid fa-arrow-pointer icon-emerald"></i>
-        </div>
-        <strong class="text-emerald">{{ clicked }}</strong>
-        <p>High-intent ad conversions</p>
-    </div>
-
-    <div class="card">
-        <div class="card-top">
-            <small>NO-CLICKS (0)</small>
-            <i class="fa-solid fa-ban icon-rose"></i>
-        </div>
-        <strong class="text-rose">{{ not_clicked }}</strong>
-        <p>Low conversion probability</p>
-    </div>
-
-    <div class="card">
-        <div class="card-top">
-            <small>AVG CLICK PROBABILITY</small>
-            <i class="fa-solid fa-gauge-high icon-indigo"></i>
-        </div>
-        <strong class="text-cyan">{{ (avg * 100)|round(1) }}%</strong>
-        <p>Model F1: {{ (model_f1 * 100)|round(1) }}%</p>
-    </div>
-</div>
-
-<!-- Dashboard Charts Row -->
-<div class="charts-grid">
-    <section class="panel">
-        <div class="panel-head">
-            <div>
-                <h3>Click Probability Trend (Recent Evaluations)</h3>
-                <p>Estimated ad-click likelihood (%) across latest visitor sessions</p>
+    <!-- Top Oasis Infobyte Navbar -->
+    <nav class="navbar">
+        <div class="brand-wrap">
+            <div class="logo-frame">
+                <img src="{{ url_for('static', filename='images/oasis_logo.jpg') }}"
+                     alt="Oasis Infobyte Logo"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';">
+                <span class="logo-fallback">OIB</span>
+            </div>
+            <div class="brand-info">
+                <span class="internship-tag">OASIS INFOBYTE · INTERNSHIP </span>
+                <h1>Data Science Project — Task 5: <span>Sales Prediction</span></h1>
             </div>
         </div>
-        <div class="chart-container">
-            <canvas id="trendChart"></canvas>
-        </div>
-    </section>
 
-    <section class="panel">
-        <div class="panel-head">
-            <div>
-                <h3>Conversion Split</h3>
-                <p>Predicted Clicks vs. No-Clicks</p>
+        <button type="button" class="nav-btn" onclick="toggleModal(true)">
+            <i class="fa-solid fa-circle-info"></i> Model & Project Info
+        </button>
+    </nav>
+
+    <!-- Centered Gradient Card Workspace -->
+    <main class="workspace">
+        <div class="gradient-card-shell">
+            <section class="gradient-card">
+
+                <div class="card-header">
+                    <span class="pill-badge"><i class="fa-solid fa-chart-line"></i> PREDICTIVE MARKETING ANALYTICS</span>
+                    <h2>Sales Revenue Estimator</h2>
+                    <p>Enter advertising spend across TV, Radio, and Newspaper channels to forecast expected product sales.</p>
+                </div>
+
+                <!-- 3-Column Responsive Input Form -->
+                <form method="POST" action="/" id="salesForm">
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label for="tv"><i class="fa-solid fa-tv text-cyan"></i> TV Budget ($k)</label>
+                            <input
+                                type="number"
+                                id="tv"
+                                name="tv"
+                                step="any"
+                                min="0"
+                                placeholder="e.g. 230.1"
+                                value="{{ tv }}"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="radio"><i class="fa-solid fa-radio text-indigo"></i> Radio Budget ($k)</label>
+                            <input
+                                type="number"
+                                id="radio"
+                                name="radio"
+                                step="any"
+                                min="0"
+                                placeholder="e.g. 37.8"
+                                value="{{ radio }}"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="newspaper"><i class="fa-solid fa-newspaper text-emerald"></i> Newspaper Budget ($k)</label>
+                            <input
+                                type="number"
+                                id="newspaper"
+                                name="newspaper"
+                                step="any"
+                                min="0"
+                                placeholder="e.g. 69.2"
+                                value="{{ newspaper }}"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <button type="submit" class="predict-btn" id="submitBtn">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span id="btnLabel">Predict Expected Sales</span>
+                    </button>
+                </form>
+
+                <!-- Error Banner -->
+                {% if error %}
+                <div class="error-box">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>{{ error }}</span>
+                </div>
+                {% endif %}
+
+                <!-- Prediction Outcome & Dynamic Visual -->
+                {% if prediction is not none %}
+                <div class="result-box">
+                    <div class="result-grid">
+                        <div class="result-metric">
+                            <span class="result-label">ESTIMATED PRODUCT SALES</span>
+                            <div class="result-value">{{ "%.2f"|format(prediction) }} <small>Units</small></div>
+                            <p class="result-sub">
+                                Forecasted from <strong>${{ "%.2f"|format(submitted_budgets.total) }}k</strong> total ad spend using <strong>{{ model_name }}</strong>.
+                            </p>
+
+                            <div class="budget-chips">
+                                <span>TV: <b>${{ submitted_budgets.tv }}k</b></span>
+                                <span>Radio: <b>${{ submitted_budgets.radio }}k</b></span>
+                                <span>News: <b>${{ submitted_budgets.newspaper }}k</b></span>
+                            </div>
+                        </div>
+
+                        <div class="result-chart">
+                            <canvas id="budgetChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Compact Model Metrics Footer Strip -->
+                <div class="metrics-strip">
+                    <div class="metric-pill">
+                        <span>Algorithm</span>
+                        <strong>{{ model_name }}</strong>
+                    </div>
+                    <div class="metric-pill">
+                        <span>Test R² Accuracy</span>
+                        <strong class="text-emerald">{{ r2_score }}</strong>
+                    </div>
+                    <div class="metric-pill">
+                        <span>Test RMSE</span>
+                        <strong class="text-cyan">{{ rmse_score }}</strong>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <!-- Project & Model Modal -->
+    <div class="modal" id="aboutModal" onclick="if(event.target===this) toggleModal(false)">
+        <div class="modal-box">
+            <button type="button" class="close-modal" onclick="toggleModal(false)">&times;</button>
+            <span class="pill-badge">PROJECT DOCUMENTATION</span>
+            <h3>Data Science Task 5: Sales Prediction</h3>
+            <p class="modal-desc">
+                Developed for the <strong>Oasis Infobyte Data Science Internship</strong>. This regression model predicts product sales volume based on multi-channel advertising expenditure.
+            </p>
+            <div class="modal-list">
+                <div><strong>Pipeline:</strong> Polynomial Features (Degree 2) + Linear Regression</div>
+                <div><strong>Input Channels:</strong> TV, Radio, and Newspaper advertising budgets</div>
+                <div><strong>Performance:</strong> 98.69% R² variance explained with 0.6426 RMSE</div>
             </div>
         </div>
-        <div class="chart-container doughnut-wrap">
-            <canvas id="splitChart"></canvas>
-        </div>
-    </section>
-</div>
-
-<!-- Recent Prediction Logs Table -->
-<section class="panel" style="margin-top: 20px;">
-    <div class="panel-head">
-        <div>
-            <h3>Recent Prediction Logs</h3>
-            <p>Latest visitor profiles evaluated and stored in <code>prediction_history.csv</code></p>
-        </div>
-        {% if recent %}
-        <form action="/history/clear" method="post" onsubmit="return confirm('Clear all saved prediction logs?')">
-            <button class="button danger" type="submit"><i class="fa-solid fa-trash-can"></i> Clear Logs</button>
-        </form>
-        {% endif %}
     </div>
 
-    {% if recent %}
-    <div class="table-scroll">
-        <table>
-            <thead>
-                <tr>
-                    <th>TIMESTAMP</th>
-                    <th>AGE</th>
-                    <th>GENDER</th>
-                    <th>SITE TIME</th>
-                    <th>INTERNET USE</th>
-                    <th>AREA INCOME</th>
-                    <th>CLICK PROB.</th>
-                    <th>OUTCOME</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in recent %}
-                <tr>
-                    <td>{{ r.timestamp }}</td>
-                    <td>{{ r.age|float|int }} yrs</td>
-                    <td>{{ r.gender }}</td>
-                    <td>{{ r.daily_time }} min</td>
-                    <td>{{ r.daily_internet }} min</td>
-                    <td>${{ "{:,.0f}".format(r.area_income|float) }}</td>
-                    <td><strong>{{ (r.click_probability|float * 100)|round(1) }}%</strong></td>
-                    <td>
-                        <span class="pill {{ 'yes' if r.prediction == '1' else 'no' }}">
-                            {{ 'Likely Click' if r.prediction == '1' else 'Unlikely' }}
-                        </span>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <div class="empty">
-        <i class="fa-solid fa-chart-simple"></i>
-        <h3>No predictions recorded yet</h3>
-        <p>Run your first visitor evaluation to populate the dashboard charts and table.</p>
-        <a class="button" href="/predict">Make First Prediction</a>
-    </div>
-    {% endif %}
-</section>
+    <footer class="footer">
+        Data Science Project — Task 5: Sales Prediction | Oasis Infobyte Internship
+    </footer>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const labels = {{ chart_labels | tojson }};
-    const probs = {{ chart_probs | tojson }};
-    const clickedCount = {{ clicked }};
-    const notClickedCount = {{ not_clicked }};
+    <script>
+        function toggleModal(show) {
+            document.getElementById('aboutModal').style.display = show ? 'flex' : 'none';
+        }
 
-    // Fallback demo values if history is empty so charts render cleanly
-    const displayLabels = labels.length ? labels : ["Sample 1", "Sample 2", "Sample 3", "Sample 4"];
-    const displayProbs = probs.length ? probs : [84.2, 22.5, 91.0, 38.4];
+        document.getElementById('salesForm').addEventListener('submit', function () {
+            const btn = document.getElementById('submitBtn');
+            const lbl = document.getElementById('btnLabel');
+            lbl.textContent = 'Calculating Forecast...';
+            btn.style.opacity = '0.85';
+        });
 
-    // 1. Line Trend Chart
-    const trendCtx = document.getElementById('trendChart').getContext('2d');
-    new Chart(trendCtx, {
-        type: 'line',
-        data: {
-            labels: displayLabels,
-            datasets: [{
-                label: 'Click Probability (%)',
-                data: displayProbs,
-                borderColor: '#38bdf8',
-                backgroundColor: 'rgba(56, 189, 248, 0.15)',
-                borderWidth: 3,
-                pointBackgroundColor: '#818cf8',
-                pointBorderColor: '#ffffff',
-                pointRadius: 5,
-                fill: true,
-                tension: 0.35
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    grid: { color: 'rgba(148, 163, 184, 0.12)' },
-                    ticks: { color: '#94a3b8', callback: v => v + '%' }
+        {% if prediction is not none and submitted_budgets %}
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('budgetChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['TV ($k)', 'Radio ($k)', 'Newspaper ($k)', 'Predicted Sales'],
+                    datasets: [{
+                        label: 'Value',
+                        data: [
+                            {{ submitted_budgets.tv }},
+                            {{ submitted_budgets.radio }},
+                            {{ submitted_budgets.newspaper }},
+                            {{ prediction }}
+                        ],
+                        backgroundColor: [
+                            'rgba(56, 189, 248, 0.75)',
+                            'rgba(129, 140, 248, 0.75)',
+                            'rgba(168, 85, 247, 0.75)',
+                            'rgba(52, 211, 153, 0.9)'
+                        ],
+                        borderColor: ['#38bdf8', '#818cf8', '#a855f7', '#34d399'],
+                        borderWidth: 1.5,
+                        borderRadius: 8
+                    }]
                 },
-                x: {
-                    grid: { display: false },
-                    ticks: { color: '#94a3b8' }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(148, 163, 184, 0.12)' },
+                            ticks: { color: '#94a3b8', font: { size: 11 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#e2e8f0', font: { size: 11, weight: '600' } }
+                        }
+                    }
                 }
-            }
-        }
-    });
+            });
+        });
+        {% endif %}
+    </script>
 
-    // 2. Doughnut Conversion Chart
-    const splitCtx = document.getElementById('splitChart').getContext('2d');
-    const hasData = (clickedCount + notClickedCount) > 0;
-    new Chart(splitCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Likely Click (1)', 'Unlikely (0)'],
-            datasets: [{
-                data: hasData ? [clickedCount, notClickedCount] : [1, 1],
-                backgroundColor: ['#10b981', '#f43f5e'],
-                borderColor: '#0d1832',
-                borderWidth: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '68%',
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { color: '#cbd5e1', padding: 16, font: { size: 12 } }
-                }
-            }
-        }
-    });
-});
-</script>
-{% endblock %}
+</body>
+</html>

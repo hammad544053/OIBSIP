@@ -1,0 +1,12 @@
+SALES PREDICTION - EDA SUMMARY
+=============================================
+
+Total Records: 200
+Total Columns: 4
+Missing Values: 0
+Duplicate Records: 0
+
+Correlation with Sales:
+tv          0.782
+radio       0.576
+newspaper   0.228

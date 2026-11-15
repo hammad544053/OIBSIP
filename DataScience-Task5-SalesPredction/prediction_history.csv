@@ -1,3 +1,0 @@
-timestamp,age,gender,daily_time,area_income,daily_internet,year,month,day,hour,prediction,click_probability
-2026-11-14 19:41:06,33.0,Male,68.5,54999.85,180.09,2026,11,14,19,1,0.555677
-2026-11-14 23:18:59,32.0,Female,69.0,55000.0,189.7,2026,11,14,23,0,0.461608

@@ -1,0 +1,4 @@
+Model,Best_CV_RMSE,Best_Parameters,Best_Train_RMSE,CV_RMSE_Std
+Polynomial Regression,0.6758984496775746,{'poly__degree': 2},0.5789308470296544,0.2784180654929927
+Gradient Boosting,0.8511013132685747,"{'regressor__learning_rate': 0.05, 'regressor__max_depth': 3, 'regressor__min_samples_leaf': 2, 'regressor__n_estimators': 200}",0.1689971337531882,0.18183309118807423
+Random Forest,0.8918356597923678,"{'regressor__max_depth': 10, 'regressor__min_samples_leaf': 1, 'regressor__min_samples_split': 2, 'regressor__n_estimators': 200}",0.3253869210608629,0.19933846640433345

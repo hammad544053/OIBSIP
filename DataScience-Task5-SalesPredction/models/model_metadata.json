@@ -1,0 +1,25 @@
+{
+    "project_name": "Sales Prediction Using Python",
+    "dataset": "Advertising.csv",
+    "model_name": "Polynomial Regression",
+    "model_type": "Baseline",
+    "model_file": "best_sales_prediction_pipeline.joblib",
+    "features": [
+        "tv",
+        "radio",
+        "newspaper"
+    ],
+    "target": "sales",
+    "polynomial_degree": 2,
+    "training_samples": 160,
+    "testing_samples": 40,
+    "cross_validation_rmse": 0.6758984496775746,
+    "performance": {
+        "train_mae": 0.4089721951355069,
+        "test_mae": 0.5261794444043734,
+        "train_rmse": 0.6003304710491731,
+        "test_rmse": 0.6425809120553613,
+        "train_r2": 0.986104518792419,
+        "test_r2": 0.9869181490609604
+    }
+}

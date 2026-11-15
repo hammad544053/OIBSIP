@@ -1,0 +1,53 @@
+
+SALES PREDICTION USING PYTHON
+FINAL PROJECT SUMMARY
+==========================================
+
+Dataset:
+Advertising.csv
+
+Dataset Samples:
+200
+
+Input Features:
+['tv', 'radio', 'newspaper']
+
+Target:
+sales
+
+Training Samples:
+160
+
+Testing Samples:
+40
+
+Selected Model:
+Polynomial Regression
+
+Model Type:
+Baseline
+
+FINAL PERFORMANCE
+==========================================
+
+Training MAE:
+0.4090
+
+Testing MAE:
+0.5262
+
+Training RMSE:
+0.6003
+
+Testing RMSE:
+0.6426
+
+Training R2:
+0.9861
+
+Testing R2:
+0.9869
+
+==========================================
+Model evaluation and diagnostics completed.
+==========================================
